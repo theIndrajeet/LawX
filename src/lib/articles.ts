@@ -18,7 +18,6 @@ export interface ArticleData {
 }
 
 export function getSortedArticlesData(): ArticleData[] {
-  // Read files, parse front matter, filter by published status, and sort by date
   const fileNames = fs.readdirSync(articlesDirectory);
   const allArticlesData = fileNames
     .filter(fileName => fileName.endsWith('.md'))
@@ -47,16 +46,22 @@ export function getSortedArticlesData(): ArticleData[] {
 }
 
 export function getAllArticleSlugs() {
-  const fileNames = fs.readdirSync(articlesDirectory);
-  return fileNames
-    .filter(fileName => fileName.endsWith('.md'))
-    .map((fileName) => {
-      return {
-        params: {
-          slug: fileName.replace(/\.md$/, ''),
-        },
-      };
-    });
+  try {
+    const fileNames = fs.readdirSync(articlesDirectory);
+    return fileNames
+      .filter(fileName => fileName.endsWith('.md'))
+      .map((fileName) => {
+        const slug = fileName.replace(/\.md$/, '');
+        return {
+          params: {
+            slug,
+          },
+        };
+      });
+  } catch (error) {
+    console.error('Error getting article slugs:', error);
+    return [];
+  }
 }
 
 export function getArticleData(slug: string): ArticleData | null {
