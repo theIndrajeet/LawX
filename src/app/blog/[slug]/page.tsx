@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${article.seo_title || article.title} | LawX`,
+    title: `${article.seo_title || article.title} | LawX`,'
     description: article.meta_description || article.excerpt || '
   };
 }
