@@ -2,16 +2,18 @@ import { getAllArticleSlugs, getArticleData } from '@/lib/articles';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Metadata } from 'next';
+import Image from 'next/image';
 
-interface BlogPostPageProps {
-  params: {
-    slug: string;
-  };
+interface PageParams {
+  slug: string;
 }
 
-export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
-  const { slug } = params;
-  const article = getArticleData(slug);
+interface PageProps {
+  params: PageParams;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const article = getArticleData(params.slug);
   
   if (!article) {
     return {
@@ -26,14 +28,15 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   };
 }
 
-export function generateStaticParams() {
+export async function generateStaticParams(): Promise<PageParams[]> {
   const articles = getAllArticleSlugs();
-  return articles;
+  return articles.map((article) => ({
+    slug: article.params.slug,
+  }));
 }
 
-export default function BlogPostPage({ params }: BlogPostPageProps) {
-  const { slug } = params;
-  const article = getArticleData(slug);
+export default function BlogPostPage({ params }: PageProps) {
+  const article = getArticleData(params.slug);
 
   if (!article) {
     return <div className="max-w-4xl mx-auto px-4 py-12">Article not found.</div>;
@@ -50,11 +53,15 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         })}
       </p>
       {article.featuredImage && (
-        <img
-          src={article.featuredImage}
-          alt={article.imageAlt || article.title}
-          className="w-full h-auto mb-8 rounded"
-        />
+        <div className="w-full h-[400px] relative mb-8">
+          <Image
+            src={article.featuredImage}
+            alt={article.imageAlt || article.title}
+            fill
+            className="rounded object-cover"
+            priority
+          />
+        </div>
       )}
       <div className="prose max-w-none">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.body}</ReactMarkdown>
